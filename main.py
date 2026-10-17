@@ -1,21 +1,546 @@
-"""RAILNOVA launcher.
-The original readable application source is compressed in this file to keep the repository transfer compact.
-When run, this launcher expands it to railnova_source.py next to this file, then executes that source.
 """
-from pathlib import Path
-import base64
-import zlib
+RAILNOVA — Animated Train Booking & Journey Companion
+Python 3.10+ | Tkinter + SQLite (standard library only)
+Run: python main.py
+Demo booking system for academic use. Train availability/fares are sample data, not live railway data.
+"""
+import tkinter as tk
+from tkinter import ttk, messagebox
+import sqlite3, os, random, math, uuid
+from datetime import datetime, date, timedelta
 
-_PAYLOAD = "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"
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(APP_DIR, "railnova.db")
+BG = "#060B1D"
+INK = "#111A2E"
+MUTED = "#A7B4CC"
+BLUE = "#315EF7"
+CYAN = "#37C8D0"
+PURPLE = "#8764F8"
+PINK = "#FF779A"
+WHITE = "#0D1732"
+GREEN = "#20A779"
+RED = "#E65368"
+GOLD = "#F4B942"
+
+TRAIN_DATA = [
+    ("12603", "Hyderabad Express", "Chennai Central", "Hyderabad Deccan", "06:15", "14:20", 485, "Daily", "Superfast"),
+    ("12604", "Charminar Express", "Chennai Central", "Hyderabad Deccan", "18:10", "06:45", 620, "Daily", "Express"),
+    ("12760", "Charminar SF", "Hyderabad Deccan", "Chennai Central", "18:30", "07:05", 640, "Daily", "Superfast"),
+    ("12657", "Bengaluru Mail", "Chennai Central", "Bengaluru City", "22:50", "05:45", 410, "Daily", "Mail"),
+    ("12028", "Shatabdi Express", "Chennai Central", "Bengaluru City", "06:00", "10:55", 890, "Daily", "Shatabdi"),
+    ("12609", "Mysuru Express", "Chennai Central", "Mysuru Junction", "13:35", "22:10", 525, "Daily", "Express"),
+    ("12727", "Godavari Express", "Hyderabad Deccan", "Visakhapatnam", "17:15", "06:30", 710, "Daily", "Superfast"),
+    ("12723", "Telangana Express", "Hyderabad Deccan", "New Delhi", "06:00", "10:40", 990, "Daily", "Superfast"),
+    ("12625", "Kerala Express", "Chennai Central", "Thiruvananthapuram", "11:00", "07:15", 1050, "Daily", "Express"),
+    ("12840", "Coromandel Express", "Chennai Central", "Howrah Junction", "07:00", "11:55", 920, "Daily", "Superfast"),
+    ("12007", "Deccan Queen", "Mumbai CST", "Pune Junction", "17:10", "20:25", 560, "Daily", "Intercity"),
+    ("12951", "Mumbai Rajdhani", "Mumbai Central", "New Delhi", "16:35", "08:30", 1850, "Daily", "Rajdhani"),
+    ("12616", "Grand Trunk Express", "Chennai Central", "New Delhi", "18:40", "06:35", 1150, "Daily", "Superfast"),
+    ("12785", "Kacheguda Express", "Hyderabad Deccan", "Bengaluru City", "18:20", "07:00", 720, "Daily", "Express"),
+    ("12163", "Chennai Express", "Mumbai CST", "Chennai Central", "20:30", "19:15", 880, "Daily", "Superfast"),
+]
+STATIONS = sorted({x[2] for x in TRAIN_DATA} | {x[3] for x in TRAIN_DATA} | {
+    "Vijayawada Junction", "Tirupati", "Coimbatore Junction", "Madurai Junction",
+    "Kochi", "Pune Junction", "Ahmedabad Junction", "Kolkata", "Lucknow", "Jaipur",
+    "Secunderabad Junction", "Visakhapatnam", "Warangal", "Nellore"
+})
+CLASSES = {"Sleeper": 1.0, "AC 3 Tier": 2.0, "AC 2 Tier": 3.0, "AC First Class": 4.2, "Chair Car": 1.35, "Executive Chair": 2.8}
+
+class RailDB:
+    def __init__(self):
+        self.conn = sqlite3.connect(DB_PATH)
+        self.conn.row_factory = sqlite3.Row
+        self.conn.execute("""CREATE TABLE IF NOT EXISTS bookings(
+            id INTEGER PRIMARY KEY AUTOINCREMENT, pnr TEXT UNIQUE, train_no TEXT, train_name TEXT,
+            origin TEXT, destination TEXT, journey_date TEXT, depart TEXT, arrive TEXT,
+            travel_class TEXT, passengers INTEGER, passenger_names TEXT, total_fare REAL,
+            status TEXT, created_at TEXT, coach TEXT, seats TEXT)""")
+        self.conn.commit()
+    def all(self, status=None):
+        if status:
+            return self.conn.execute("SELECT * FROM bookings WHERE status=? ORDER BY journey_date, depart", (status,)).fetchall()
+        return self.conn.execute("SELECT * FROM bookings ORDER BY created_at DESC").fetchall()
+    def add(self, d):
+        pnr = str(random.randint(1000000000, 9999999999))
+        coach = random.choice(["S1", "S2", "S3", "B1", "B2", "A1", "C1"])
+        seats = ", ".join(f"{coach}/{random.randint(1,72)}" for _ in range(d["passengers"]))
+        self.conn.execute("""INSERT INTO bookings(pnr,train_no,train_name,origin,destination,journey_date,depart,arrive,travel_class,passengers,passenger_names,total_fare,status,created_at,coach,seats)
+            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (pnr,d["train_no"],d["train_name"],d["origin"],d["destination"],d["journey_date"],d["depart"],d["arrive"],d["travel_class"],d["passengers"],d["passenger_names"],d["total_fare"],"Upcoming",datetime.now().isoformat(timespec="seconds"),coach,seats))
+        self.conn.commit()
+        return pnr
+    def cancel(self, pnr):
+        self.conn.execute("UPDATE bookings SET status='Cancelled' WHERE pnr=?", (pnr,))
+        self.conn.commit()
+    def close(self): self.conn.close()
+
+class RailNova:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("RAILNOVA | Train Booking & Journey Companion")
+        self.root.geometry("1420x900")
+        self.root.minsize(1120, 740)
+        self.root.configure(bg=BG)
+        self.db = RailDB()
+        self.page = "Overview"
+        self.animation_tick = 0
+        self.search_results = []
+        self.selected_train = None
+        self.countdown_job = None
+        self.setup_style()
+        self.build_shell()
+        self.show_page("Overview")
+        self.animate_background()
+        self.update_clock()
+        self.refresh_counts()
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+
+    def setup_style(self):
+        s = ttk.Style()
+        try: s.theme_use("clam")
+        except tk.TclError: pass
+        s.configure("Treeview", background=WHITE, fieldbackground=WHITE, foreground="#EDF3FF", rowheight=34, borderwidth=0, font=("Segoe UI", 10))
+        s.configure("Treeview.Heading", background="#263553", foreground="#EDF3FF", font=("Segoe UI", 10, "bold"), relief="flat")
+        s.map("Treeview", background=[("selected", "#35486D")], foreground=[("selected", INK)])
+        s.configure("TCombobox", padding=8, fieldbackground="#101C39", background="#101C39", foreground="#EDF3FF")
+        s.configure("TEntry", padding=8, fieldbackground="#101C39", foreground="#EDF3FF")
+
+    def build_shell(self):
+        self.shell = tk.Frame(self.root, bg=BG)
+        self.shell.pack(fill="both", expand=True)
+        self.sidebar = tk.Frame(self.shell, bg="#080D25", width=208, highlightbackground="#153D80", highlightthickness=1)
+        self.sidebar.pack(side="left", fill="y")
+        self.sidebar.pack_propagate(False)
+        logo = tk.Frame(self.sidebar, bg="#080D25")
+        logo.pack(fill="x", padx=22, pady=(24, 30))
+        tk.Canvas(logo, width=42, height=42, bg="#080D25", highlightthickness=0).pack(side="left")
+        cv = logo.winfo_children()[0]
+        cv.create_oval(3,3,39,39,fill=BLUE,outline="")
+        cv.create_line(8,25,18,15,28,25,36,12,fill="white",width=3,smooth=True)
+        name = tk.Frame(logo, bg="#080D25"); name.pack(side="left", padx=10)
+        tk.Label(name, text="RAILNOVA", bg="#080D25", fg="white", font=("Segoe UI", 15, "bold")).pack(anchor="w")
+        tk.Label(name, text="JOURNEY, REIMAGINED", bg="#080D25", fg="#A8B7D8", font=("Segoe UI", 7, "bold")).pack(anchor="w", pady=(2,0))
+        tk.Label(self.sidebar, text="WORKSPACE", bg="#080D25", fg="#8392B4", font=("Segoe UI", 8, "bold")).pack(anchor="w", padx=24, pady=(0,10))
+        self.nav_buttons = {}
+        navs = [("Overview","◈"),("Book Tickets","＋"),("My Tickets","▤"),("Incoming Trains","◉"),("Upcoming Journeys","◷"),("Cancelled Tickets","⊘"),("Journey Timer","◴"),("Train Explorer","⌕"),("Help & About","?")]
+        for label, icon in navs:
+            b = tk.Button(self.sidebar, text=f"  {icon}     {label}", anchor="w", command=lambda n=label:self.show_page(n),
+                          bg="#080D25", fg="#C6D0E5", activebackground="#2B3B5E", activeforeground="white",
+                          relief="flat", bd=0, padx=17, pady=12, font=("Segoe UI", 10), cursor="hand2")
+            b.pack(fill="x", padx=10, pady=2)
+            self.nav_buttons[label] = b
+        spacer = tk.Frame(self.sidebar, bg="#080D25"); spacer.pack(fill="both", expand=True)
+        status = tk.Frame(self.sidebar, bg="#1C2942", padx=13, pady=12); status.pack(fill="x", padx=14, pady=18)
+        tk.Label(status, text="●  SYSTEM ONLINE", bg="#1C2942", fg="#62E2B5", font=("Segoe UI", 9, "bold")).pack(anchor="w")
+        tk.Label(status, text="Local demo database active", bg="#1C2942", fg="#B8C5DD", font=("Segoe UI", 8)).pack(anchor="w", pady=(5,0))
+        self.main = tk.Frame(self.shell, bg=BG)
+        self.main.pack(side="left", fill="both", expand=True)
+        self.topbar = tk.Frame(self.main, bg="#080D25", height=70, highlightbackground="#174B9B", highlightthickness=1)
+        self.topbar.pack(fill="x"); self.topbar.pack_propagate(False)
+        self.top_title = tk.Label(self.topbar, text="RAILNOVA  /  OVERVIEW", bg="#080D25", fg="#F4F7FF", font=("Segoe UI", 13, "bold"))
+        self.top_title.pack(side="left", padx=18)
+        self.quicknav = tk.Frame(self.topbar, bg="#080D25")
+        self.quicknav.pack(side="left", padx=10)
+        for nav_label in ["Book Tickets", "My Tickets", "Incoming Trains", "Upcoming Journeys", "Cancelled Tickets", "Journey Timer", "Train Explorer"]:
+            short = {"Book Tickets":"Book","My Tickets":"My Tickets","Incoming Trains":"Incoming","Upcoming Journeys":"Upcoming","Cancelled Tickets":"Cancelled","Journey Timer":"Journey Timer","Train Explorer":"Explorer"}[nav_label]
+            b = tk.Button(self.quicknav, text=short, command=lambda n=nav_label:self.show_page(n), bg="#101C42", fg="#DCE8FF",
+                          activebackground="#223B79", activeforeground="white", relief="flat", bd=0,
+                          font=("Segoe UI", 9, "bold"), padx=10, pady=8, cursor="hand2",
+                          highlightbackground="#164C9B", highlightthickness=1)
+            b.pack(side="left", padx=3, pady=12)
+        self.clock_label = tk.Label(self.topbar, text="", bg="#080D25", fg="#7CE7DE", font=("Segoe UI", 9, "bold"))
+        self.clock_label.pack(side="right", padx=16)
+        self.page_area = tk.Frame(self.main, bg=BG)
+        self.page_area.pack(fill="both", expand=True)
+        self.toast = tk.Label(self.main, text="", bg=INK, fg=WHITE, font=("Segoe UI", 10, "bold"), padx=16, pady=10)
+
+    def card(self, parent, bg=WHITE, radius=0, padx=18, pady=16):
+        f = tk.Frame(parent, bg=bg, highlightbackground="#2B3852", highlightthickness=1)
+        return f
+    def label(self, parent, text, size=10, color=INK, bold=False, bg=None, **kw):
+        return tk.Label(parent, text=text, font=("Segoe UI", size, "bold" if bold else "normal"), fg=color, bg=bg or parent.cget("bg"), **kw)
+    def button(self, parent, text, command, bg=BLUE, fg=WHITE, padx=16, pady=10, **kw):
+        return tk.Button(parent, text=text, command=command, bg=bg, fg=fg, activebackground=bg, activeforeground=fg,
+                         relief="flat", bd=0, cursor="hand2", font=("Segoe UI", 10, "bold"), padx=padx, pady=pady, **kw)
+    def entry(self, parent, var=None, width=22):
+        e = ttk.Entry(parent, textvariable=var, width=width, font=("Segoe UI", 10))
+        return e
+    def field(self, parent, title, widget, row, col, colspan=1):
+        self.label(parent, title.upper(), 8, MUTED, True, bg=parent.cget("bg")).grid(row=row*2, column=col, columnspan=colspan, sticky="w", padx=8, pady=(8,3))
+        widget.grid(row=row*2+1, column=col, columnspan=colspan, sticky="ew", padx=8, pady=(0,7))
+    def clear_page(self):
+        for w in self.page_area.winfo_children(): w.destroy()
+    def show_page(self, name):
+        self.page = name
+        self.top_title.config(text=name)
+        for n,b in self.nav_buttons.items():
+            b.config(bg="#31466D" if n==name else "#17233D", fg="white" if n==name else "#C6D0E5")
+        self.clear_page()
+        funcs = {"Overview":self.page_overview,"Book Tickets":self.page_book,"My Tickets":self.page_tickets,
+                 "Incoming Trains":self.page_incoming,"Upcoming Journeys":self.page_upcoming,
+                 "Cancelled Tickets":self.page_cancelled,"Journey Timer":self.page_timer,
+                 "Train Explorer":self.page_explorer,"Help & About":self.page_help}
+        funcs.get(name,self.page_overview)()
+    def scroll_area(self, parent=None):
+        outer = tk.Frame(parent or self.page_area, bg=BG)
+        outer.pack(fill="both", expand=True)
+        canvas = tk.Canvas(outer, bg=BG, highlightthickness=0)
+        bar = ttk.Scrollbar(outer, orient="vertical", command=canvas.yview)
+        inner = tk.Frame(canvas, bg=BG)
+        inner.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        window_id = canvas.create_window((0,0), window=inner, anchor="nw")
+        canvas.bind("<Configure>", lambda e: canvas.itemconfigure(window_id, width=max(e.width, 900)))
+        canvas.configure(yscrollcommand=bar.set)
+        canvas.pack(side="left", fill="both", expand=True); bar.pack(side="right", fill="y")
+        return inner
+    def hero(self, parent, title, subtitle, accent=BLUE):
+        f = tk.Frame(parent, bg="#050B24", height=170, highlightbackground="#174C9D", highlightthickness=1)
+        f.pack(fill="x", padx=14, pady=(14,14)); f.pack_propagate(False)
+        c = tk.Canvas(f, bg="#050B24", height=170, highlightthickness=0)
+        c.place(relwidth=1, relheight=1)
+        # layered neon atmosphere, city silhouettes and a luminous rail corridor
+        c.create_oval(590,-120,980,250, fill="#101E55", outline="")
+        c.create_oval(700,-100,1080,260, fill="#11164A", outline="")
+        for i in range(18):
+            x=590+i*34
+            h=22+((i*31)%72)
+            c.create_rectangle(x,110-h,x+18,130,fill="#0A1536",outline="#142A63")
+            for yy in range(118-h+8,122,12):
+                c.create_rectangle(x+5,yy,x+8,yy+3,fill="#1D4F9A",outline="")
+        for i in range(5):
+            c.create_line(610+i*12,148,880+i*30,100,fill="#123D95",width=2)
+        c.create_line(620,154,1090,154,fill="#1748A6",width=2)
+        c.create_line(660,159,1110,159,fill="#D52CFF",width=2)
+        # stylized futuristic train silhouette
+        c.create_polygon(710,122,750,91,820,83,884,101,916,129,908,143,705,143,
+                         fill="#0B2E70",outline="#1EDBFF",width=2)
+        c.create_polygon(755,96,817,88,861,103,876,121,750,121,fill="#142B67",outline="#38DFFF",width=2)
+        c.create_polygon(817,90,860,104,875,121,817,121,fill="#5F8FFF",outline="#C5F9FF",width=1)
+        for x in [735,765,795,825,855]:
+            c.create_oval(x,132,x+12,144,fill="#061126",outline="#38DFFF",width=2)
+        c.create_line(720,127,898,127,fill="#FF36E8",width=3)
+        c.create_oval(893,123,902,132,fill="#E6FFFF",outline="#FF3DF0",width=2)
+        # animated glints are redrawn by animate_background
+        for x,y in [(640,36),(690,62),(900,30),(1020,48),(950,88)]:
+            c.create_oval(x,y,x+4,y+4,fill="#58F4FF",outline="")
+        c.create_text(24,51,text=title,anchor="w",fill="#F6F8FF",font=("Segoe UI",22,"bold"))
+        c.create_text(26,87,text=subtitle,anchor="w",fill="#C3D8FF",font=("Segoe UI",10))
+        c.create_text(27,125,text="✦  SMART ROUTES   •   SECURE BOOKINGS   •   LIVE COUNTDOWN",
+                      anchor="w",fill="#53EFFF",font=("Segoe UI",8,"bold"))
+        c.create_line(20,145,510,145,fill="#143F83",width=1)
+        return f
+    def stat_card(self, parent, title, value, sub, accent):
+        f = tk.Frame(parent, bg=WHITE, highlightbackground="#2B3852", highlightthickness=1, padx=17, pady=14)
+        tk.Frame(f, bg=accent, width=4).pack(side="left", fill="y", padx=(0,13))
+        right = tk.Frame(f,bg=WHITE); right.pack(side="left",fill="both",expand=True)
+        self.label(right,title,9,MUTED,True,bg=WHITE).pack(anchor="w")
+        self.label(right,value,23,"#EDF3FF",True,bg=WHITE).pack(anchor="w",pady=(5,2))
+        self.label(right,sub,8,MUTED,bg=WHITE).pack(anchor="w")
+        return f
+    def page_overview(self):
+        inner = self.scroll_area()
+        self.hero(inner, "Every journey starts here.", "Book smarter. Track your train. Keep every ticket in one beautiful place.", CYAN)
+        bookings = self.db.all()
+        upcoming = [b for b in bookings if b["status"]=="Upcoming" and b["journey_date"]>=date.today().isoformat()]
+        cancelled = [b for b in bookings if b["status"]=="Cancelled"]
+        total = sum(b["total_fare"] for b in bookings if b["status"]!="Cancelled")
+        stats=tk.Frame(inner,bg=BG); stats.pack(fill="x",padx=24,pady=(0,18))
+        for i,(t,v,s,a) in enumerate([("TOTAL BOOKINGS",str(len(bookings)),"All saved tickets",BLUE),("UPCOMING JOURNEYS",str(len(upcoming)),"Ready for departure",CYAN),("CANCELLED TICKETS",str(len(cancelled)),"Kept for your records",PINK),("TRAVEL SPEND",f"₹{total:,.0f}","Non-cancelled bookings",PURPLE)]):
+            self.stat_card(stats,t,v,s,a).grid(row=0,column=i,sticky="nsew",padx=(0 if i==0 else 8,0))
+            stats.grid_columnconfigure(i,weight=1)
+        panel=tk.Frame(inner,bg=WHITE,highlightbackground="#2B3852",highlightthickness=1)
+        panel.pack(fill="x",padx=24,pady=(0,16))
+        top=tk.Frame(panel,bg=WHITE);top.pack(fill="x",padx=20,pady=(16,10))
+        self.label(top,"Find your next connection",14,"#EDF3FF",True,bg=WHITE).pack(side="left")
+        self.button(top,"＋  New booking",lambda:self.show_page("Book Tickets"),bg=BLUE).pack(side="right")
+        form=tk.Frame(panel,bg=WHITE);form.pack(fill="x",padx=12,pady=(0,14))
+        self.from_var=tk.StringVar(value="Chennai Central"); self.to_var=tk.StringVar(value="Hyderabad Deccan")
+        self.date_var=tk.StringVar(value=(date.today()+timedelta(days=1)).isoformat())
+        self.class_var=tk.StringVar(value="Sleeper"); self.pax_var=tk.StringVar(value="1")
+        self.field(form,"From",ttk.Combobox(form,textvariable=self.from_var,values=STATIONS,state="normal"),0,0)
+        self.field(form,"To",ttk.Combobox(form,textvariable=self.to_var,values=STATIONS,state="normal"),0,1)
+        self.field(form,"Journey date (YYYY-MM-DD)",self.entry(form,self.date_var,16),0,2)
+        self.field(form,"Class",ttk.Combobox(form,textvariable=self.class_var,values=list(CLASSES),state="readonly"),0,3)
+        self.field(form,"Passengers",ttk.Combobox(form,textvariable=self.pax_var,values=[str(i) for i in range(1,7)],state="readonly"),0,4)
+        self.button(form,"Search trains  →",self.search_from_dashboard,bg=INK).grid(row=1,column=5,rowspan=2,padx=8,pady=8,sticky="nsew")
+        for i in range(6): form.grid_columnconfigure(i,weight=1)
+        lower=tk.Frame(inner,bg=BG);lower.pack(fill="x",padx=24,pady=(0,24))
+        left=tk.Frame(lower,bg=WHITE,highlightbackground="#2B3852",highlightthickness=1);left.pack(side="left",fill="both",expand=True,padx=(0,10))
+        tk.Label(left,text="YOUR NEXT DEPARTURE",bg=WHITE,fg=MUTED,font=("Segoe UI",9,"bold")).pack(anchor="w",padx=18,pady=(16,7))
+        if upcoming:
+            b=upcoming[0]
+            tk.Label(left,text=f"{b['origin']}   →   {b['destination']}",bg=WHITE,fg="#EDF3FF",font=("Segoe UI",15,"bold")).pack(anchor="w",padx=18)
+            tk.Label(left,text=f"{b['train_no']} · {b['train_name']}   •   {b['journey_date']} at {b['depart']}",bg=WHITE,fg=MUTED,font=("Segoe UI",10)).pack(anchor="w",padx=18,pady=(6,12))
+            self.button(left,"Open journey timer  ◷",lambda:self.show_page("Journey Timer"),bg="#263553",fg=BLUE).pack(anchor="w",padx=18,pady=(0,16))
+        else:
+            tk.Label(left,text="Your next adventure is waiting.",bg=WHITE,fg="#EDF3FF",font=("Segoe UI",14,"bold")).pack(anchor="w",padx=18,pady=(5,5))
+            tk.Label(left,text="Book a ticket to see your journey details here.",bg=WHITE,fg=MUTED,font=("Segoe UI",10)).pack(anchor="w",padx=18,pady=(0,14))
+        right=tk.Frame(lower,bg="#172E3B",highlightbackground="#28545A",highlightthickness=1,width=300);right.pack(side="left",fill="y");right.pack_propagate(False)
+        tk.Label(right,text="✦  RAILNOVA TIP",bg="#172E3B",fg="#178F83",font=("Segoe UI",9,"bold")).pack(anchor="w",padx=17,pady=(16,8))
+        tk.Label(right,text="Keep your PNR handy.",bg="#172E3B",fg="#EDF3FF",font=("Segoe UI",14,"bold")).pack(anchor="w",padx=17)
+        tk.Label(right,text="Open My Tickets to review passenger names, coach, seat numbers, fare and booking status.",bg="#172E3B",fg="#B4D3D7",wraplength=255,justify="left",font=("Segoe UI",10)).pack(anchor="w",padx=17,pady=(7,15))
+    def search_from_dashboard(self):
+        self.show_page("Book Tickets")
+        self.from_box.set(self.from_var.get()); self.to_box.set(self.to_var.get())
+        self.journey_date.set(self.date_var.get()); self.class_box.set(self.class_var.get()); self.passengers.set(self.pax_var.get())
+        self.search_trains()
+
+    def page_book(self):
+        inner=self.scroll_area()
+        self.hero(inner,"Book your next adventure","Choose a route, compare sample services, then save a ticket to your local journey wallet.",PURPLE)
+        panel=tk.Frame(inner,bg=WHITE,highlightbackground="#2B3852",highlightthickness=1);panel.pack(fill="x",padx=24,pady=(0,16))
+        tk.Label(panel,text="TRIP DETAILS",bg=WHITE,fg=MUTED,font=("Segoe UI",9,"bold")).pack(anchor="w",padx=18,pady=(16,0))
+        form=tk.Frame(panel,bg=WHITE);form.pack(fill="x",padx=10,pady=8)
+        self.from_box=ttk.Combobox(form,values=STATIONS,state="normal")
+        self.to_box=ttk.Combobox(form,values=STATIONS,state="normal")
+        self.journey_date=tk.StringVar(value=(date.today()+timedelta(days=1)).isoformat())
+        self.class_box=ttk.Combobox(form,values=list(CLASSES),state="readonly");self.class_box.set("Sleeper")
+        self.passengers=tk.StringVar(value="1")
+        self.field(form,"From station",self.from_box,0,0)
+        self.field(form,"To station",self.to_box,0,1)
+        self.field(form,"Journey date",self.entry(form,self.journey_date),0,2)
+        self.field(form,"Travel class",self.class_box,0,3)
+        self.field(form,"Passengers",ttk.Combobox(form,textvariable=self.passengers,values=[str(i) for i in range(1,7)],state="readonly"),0,4)
+        self.button(form,"Find trains  →",self.search_trains,bg=BLUE).grid(row=1,column=5,rowspan=2,padx=8,pady=8,sticky="nsew")
+        for i in range(6):form.grid_columnconfigure(i,weight=1)
+        self.label(inner,"Available sample services",14,"#EDF3FF",True,bg=BG).pack(anchor="w",padx=24,pady=(4,10))
+        self.results_frame=tk.Frame(inner,bg=BG);self.results_frame.pack(fill="both",expand=True,padx=24,pady=(0,24))
+        self.search_trains()
+
+    def search_trains(self):
+        origin=self.from_box.get().strip(); dest=self.to_box.get().strip(); d=self.journey_date.get().strip()
+        try: date.fromisoformat(d)
+        except ValueError:
+            messagebox.showerror("Check journey date","Enter the date as YYYY-MM-DD, for example 2026-10-18.");return
+        if not origin or not dest or origin.lower()==dest.lower():
+            messagebox.showwarning("Route needed","Choose different From and To stations.");return
+        for w in self.results_frame.winfo_children():w.destroy()
+        matched=[t for t in TRAIN_DATA if t[2].lower()==origin.lower() and t[3].lower()==dest.lower()]
+        # If no direct seeded route, offer a demo route so the UI remains useful for entered stations.
+        if not matched:
+            matched=[(f"{random.randint(12000,12999)}","RailNova Intercity",origin,dest,"08:30","16:45",560,"Daily","Demo Express")]
+        self.search_results=matched
+        if date.fromisoformat(d)<date.today():
+            self.label(self.results_frame,"This date is in the past. You can still inspect sample trains, but booking is disabled.",10,RED,bg=BG).pack(anchor="w",pady=8)
+        for t in matched:
+            f=tk.Frame(self.results_frame,bg=WHITE,highlightbackground="#2B3852",highlightthickness=1);f.pack(fill="x",pady=6)
+            left=tk.Frame(f,bg=WHITE);left.pack(side="left",fill="both",expand=True,padx=17,pady=14)
+            self.label(left,f"{t[0]}  ·  {t[1]}",13,"#EDF3FF",True,bg=WHITE).pack(anchor="w")
+            route=tk.Frame(left,bg=WHITE);route.pack(anchor="w",pady=(12,5))
+            self.label(route,t[2],10,"#EDF3FF",True,bg=WHITE).pack(side="left")
+            self.label(route,f"  ━━━━━●━━━━━  {t[3]}",10,BLUE,True,bg=WHITE).pack(side="left",padx=10)
+            self.label(left,f"Departure {t[4]}     Arrival {t[5]}     •     {t[7]}     •     {t[8]}",9,MUTED,bg=WHITE).pack(anchor="w",pady=(3,0))
+            right=tk.Frame(f,bg=WHITE);right.pack(side="right",padx=18,pady=12)
+            fare=round(t[6]*CLASSES.get(self.class_box.get(),1.0)*int(self.passengers.get() or "1"))
+            self.label(right,"TOTAL ESTIMATED FARE",8,MUTED,True,bg=WHITE).pack(anchor="e")
+            self.label(right,f"₹{fare:,}",19,"#EDF3FF",True,bg=WHITE).pack(anchor="e",pady=(3,7))
+            self.button(right,"Select & enter passengers",lambda train=t:self.booking_dialog(train),bg=BLUE,padx=12,pady=8).pack(anchor="e")
+    def booking_dialog(self, train):
+        d=self.journey_date.get().strip()
+        if date.fromisoformat(d)<date.today():
+            messagebox.showwarning("Past date","Choose today or a future date.");return
+        win=tk.Toplevel(self.root);win.title("Passenger details | RailNova");win.geometry("610x650");win.configure(bg=BG);win.transient(self.root);win.grab_set()
+        head=tk.Frame(win,bg=INK,pady=18);head.pack(fill="x")
+        tk.Label(head,text="Complete your booking",bg=INK,fg=WHITE,font=("Segoe UI",18,"bold")).pack(anchor="w",padx=22)
+        tk.Label(head,text=f"{train[0]} · {train[1]}   |   {train[2]} → {train[3]}",bg=INK,fg="#C5D2ED",font=("Segoe UI",10)).pack(anchor="w",padx=22,pady=(5,0))
+        body=tk.Frame(win,bg=BG,padx=22,pady=18);body.pack(fill="both",expand=True)
+        pax=max(1,min(6,int(self.passengers.get() or 1)))
+        namevars=[]
+        for i in range(pax):
+            self.label(body,f"Passenger {i+1} full name",9,MUTED,True,bg=BG).pack(anchor="w",pady=(7,3))
+            v=tk.StringVar();self.entry(body,v,55).pack(fill="x");namevars.append(v)
+        cls=self.class_box.get() or "Sleeper"
+        total=round(train[6]*CLASSES.get(cls,1)*pax)
+        tk.Label(body,text=f"Class: {cls}     •     Date: {d}     •     Estimated total: ₹{total:,}",bg=BG,fg="#EDF3FF",font=("Segoe UI",11,"bold")).pack(anchor="w",pady=15)
+        tk.Label(body,text="Demo project: no real railway reservation or payment is performed.",bg=BG,fg=RED,font=("Segoe UI",9)).pack(anchor="w")
+        def confirm():
+            names=[v.get().strip() for v in namevars]
+            if any(not n for n in names):
+                messagebox.showwarning("Passenger names","Enter a name for every passenger.",parent=win);return
+            data={"train_no":train[0],"train_name":train[1],"origin":train[2],"destination":train[3],"journey_date":d,"depart":train[4],"arrive":train[5],"travel_class":cls,"passengers":pax,"passenger_names":", ".join(names),"total_fare":total}
+            pnr=self.db.add(data);win.destroy();self.refresh_counts()
+            messagebox.showinfo("Booking confirmed",f"Your demo ticket is saved!\n\nPNR: {pnr}\nTrain: {train[0]} — {train[1]}\nRoute: {train[2]} → {train[3]}\nDate: {d}\nEstimated fare: ₹{total:,}\n\nOpen My Tickets to view or cancel it.")
+            self.show_page("My Tickets")
+        self.button(body,"Confirm demo booking  ✓",confirm,bg=GREEN).pack(fill="x",pady=(16,0))
+
+    def ticket_table(self,parent,rows,show_actions=True):
+        wrap=tk.Frame(parent,bg=BG);wrap.pack(fill="both",expand=True,padx=24,pady=(0,20))
+        cols=("pnr","date","train","route","depart","class","passengers","fare","status")
+        tree=ttk.Treeview(wrap,columns=cols,show="headings",height=12)
+        headers={"pnr":"PNR","date":"Journey date","train":"Train","route":"From → To","depart":"Departs","class":"Class","passengers":"Pax","fare":"Fare","status":"Status"}
+        widths={"pnr":105,"date":105,"train":190,"route":270,"depart":70,"class":105,"passengers":45,"fare":85,"status":90}
+        for c in cols:tree.heading(c,text=headers[c]);tree.column(c,width=widths[c],anchor="w")
+        for b in rows:
+            tree.insert("", "end", iid=str(b["pnr"]), values=(b["pnr"],b["journey_date"],f"{b['train_no']} · {b['train_name']}",f"{b['origin']} → {b['destination']}",b["depart"],b["travel_class"],b["passengers"],f"₹{b['total_fare']:,.0f}",b["status"]))
+        tree.pack(fill="both",expand=True)
+        actions=tk.Frame(wrap,bg=BG);actions.pack(fill="x",pady=10)
+        def selected():
+            ids=tree.selection()
+            if not ids:messagebox.showinfo("Select a ticket","Select a ticket row first.");return None
+            return ids[0]
+        self.button(actions,"View ticket details",lambda:self.ticket_detail(selected()),bg=BLUE).pack(side="left",padx=(0,8))
+        if show_actions:
+            def cancel():
+                p=selected()
+                if not p:return
+                row=next((b for b in rows if b["pnr"]==p),None)
+                if row and row["status"]=="Cancelled":messagebox.showinfo("Already cancelled","This ticket is already cancelled.");return
+                if messagebox.askyesno("Cancel ticket",f"Cancel demo ticket PNR {p}?\nThis updates the local record only."):
+                    self.db.cancel(p);self.refresh_counts();self.show_page(self.page)
+                    messagebox.showinfo("Ticket cancelled","The ticket is now listed under Cancelled Tickets.")
+            self.button(actions,"Cancel selected ticket",cancel,bg="#3B2437",fg=RED).pack(side="left")
+        return tree
+    def ticket_detail(self,pnr):
+        if not pnr:return
+        b=self.db.conn.execute("SELECT * FROM bookings WHERE pnr=?",(pnr,)).fetchone()
+        if not b:return
+        win=tk.Toplevel(self.root);win.title("Ticket details");win.geometry("560x570");win.configure(bg=BG)
+        tk.Frame(win,bg=BLUE,height=7).pack(fill="x")
+        card=tk.Frame(win,bg=WHITE,highlightbackground="#34415B",highlightthickness=1,padx=25,pady=22);card.pack(fill="both",expand=True,padx=22,pady=22)
+        tk.Label(card,text="RAILNOVA  /  E-TICKET",bg=WHITE,fg=BLUE,font=("Segoe UI",10,"bold")).pack(anchor="w")
+        tk.Label(card,text=f"{b['origin']}  →  {b['destination']}",bg=WHITE,fg="#EDF3FF",font=("Segoe UI",18,"bold")).pack(anchor="w",pady=(12,4))
+        tk.Label(card,text=f"{b['train_no']} · {b['train_name']}",bg=WHITE,fg=MUTED,font=("Segoe UI",11)).pack(anchor="w")
+        tk.Frame(card,bg="#34415B",height=1).pack(fill="x",pady=16)
+        details=[("PNR",b["pnr"]),("JOURNEY DATE",b["journey_date"]),("DEPARTURE / ARRIVAL",f"{b['depart']} / {b['arrive']}"),("CLASS",b["travel_class"]),("PASSENGERS",b["passenger_names"]),("COACH / SEATS",f"{b['coach']} · {b['seats']}"),("TOTAL FARE",f"₹{b['total_fare']:,.0f}"),("STATUS",b["status"])]
+        for k,v in details:
+            row=tk.Frame(card,bg=WHITE);row.pack(fill="x",pady=4)
+            tk.Label(row,text=k,bg=WHITE,fg=MUTED,font=("Segoe UI",8,"bold"),width=20,anchor="w").pack(side="left")
+            tk.Label(row,text=str(v),bg=WHITE,fg="#EDF3FF",font=("Segoe UI",9,"bold"),wraplength=300,justify="left").pack(side="left")
+        self.button(card,"Close ticket",win.destroy,bg=INK).pack(anchor="e",pady=(16,0))
+    def page_tickets(self):
+        self.hero(self.page_area,"My Tickets","Your complete booking wallet: PNRs, passengers, seat details, fares and status.",BLUE)
+        self.ticket_table(self.page_area,self.db.all(),True)
+    def page_upcoming(self):
+        self.hero(self.page_area,"Upcoming journeys","Everything you have booked and have not cancelled yet.",CYAN)
+        rows=[b for b in self.db.all() if b["status"]=="Upcoming" and b["journey_date"]>=date.today().isoformat()]
+        if not rows:self.label(self.page_area,"No upcoming journeys yet. Book a trip and it will appear here.",11,MUTED,bg=BG).pack(anchor="w",padx=24,pady=12)
+        self.ticket_table(self.page_area,rows,True)
+    def page_cancelled(self):
+        self.hero(self.page_area,"Cancelled tickets","A transparent history of demo tickets you cancelled.",PINK)
+        rows=self.db.all("Cancelled")
+        if not rows:self.label(self.page_area,"No cancelled tickets. Your history will appear here if you cancel a booking.",11,MUTED,bg=BG).pack(anchor="w",padx=24,pady=12)
+        self.ticket_table(self.page_area,rows,False)
+    def page_incoming(self):
+        self.hero(self.page_area,"Incoming trains","Explore the next sample departures from your selected station.",PURPLE)
+        panel=tk.Frame(self.page_area,bg=WHITE,highlightbackground="#2B3852",highlightthickness=1);panel.pack(fill="x",padx=24,pady=(0,15))
+        self.label(panel,"Select station",10,MUTED,True,bg=WHITE).pack(side="left",padx=15,pady=15)
+        station=tk.StringVar(value="Chennai Central")
+        box=ttk.Combobox(panel,textvariable=station,values=STATIONS,width=32);box.pack(side="left",padx=8,pady=12)
+        area=tk.Frame(self.page_area,bg=BG);area.pack(fill="both",expand=True,padx=24)
+        def render(*_):
+            for w in area.winfo_children():w.destroy()
+            matches=[t for t in TRAIN_DATA if t[2].lower()==station.get().lower() or t[3].lower()==station.get().lower()]
+            if not matches:matches=[(f"{random.randint(12000,12999)}","RailNova Regional",station.get(),"Nearby Junction","09:15","12:45",350,"Daily","Demo Local")]
+            for t in matches:
+                f=tk.Frame(area,bg=WHITE,highlightbackground="#2B3852",highlightthickness=1);f.pack(fill="x",pady=5)
+                tk.Label(f,text=f"◉  {t[0]}  {t[1]}",bg=WHITE,fg="#EDF3FF",font=("Segoe UI",12,"bold")).pack(side="left",padx=16,pady=15)
+                tk.Label(f,text=f"{t[2]} → {t[3]}",bg=WHITE,fg=MUTED,font=("Segoe UI",10)).pack(side="left",padx=12)
+                tk.Label(f,text=f"Dep {t[4]}  •  Arr {t[5]}",bg=WHITE,fg=BLUE,font=("Segoe UI",10,"bold")).pack(side="right",padx=18)
+        box.bind("<<ComboboxSelected>>",render);box.bind("<Return>",render);self.button(panel,"Refresh",render,bg=INK,pady=7).pack(side="left",padx=8)
+        render()
+    def page_timer(self):
+        self.hero(self.page_area,"Journey countdown","Choose an upcoming ticket and keep an eye on the time until departure.",CYAN)
+        rows=[b for b in self.db.all() if b["status"]=="Upcoming" and b["journey_date"]>=date.today().isoformat()]
+        panel=tk.Frame(self.page_area,bg=WHITE,highlightbackground="#2B3852",highlightthickness=1,padx=22,pady=20);panel.pack(fill="x",padx=24,pady=(0,16))
+        if not rows:
+            self.label(panel,"No upcoming ticket found. Book a ticket first to activate your journey timer.",12,"#EDF3FF",True,bg=WHITE).pack(anchor="w")
+            self.button(panel,"Book tickets",lambda:self.show_page("Book Tickets"),bg=BLUE).pack(anchor="w",pady=12);return
+        options=[f"{b['pnr']} | {b['journey_date']} {b['depart']} | {b['origin']} → {b['destination']}" for b in rows]
+        choice=tk.StringVar(value=options[0])
+        self.label(panel,"SELECT YOUR JOURNEY",9,MUTED,True,bg=WHITE).pack(anchor="w")
+        combo=ttk.Combobox(panel,textvariable=choice,values=options,state="readonly",width=100);combo.pack(anchor="w",fill="x",pady=(6,16))
+        timer=tk.Frame(panel,bg=INK,padx=20,pady=20);timer.pack(fill="x")
+        tk.Label(timer,text="TIME UNTIL DEPARTURE",bg=INK,fg="#B9C8E7",font=("Segoe UI",9,"bold")).pack(anchor="w")
+        digits=tk.Label(timer,text="--  DAYS   --:--:--",bg=INK,fg="#7CE7DE",font=("Consolas",30,"bold"));digits.pack(anchor="w",pady=(8,4))
+        route=tk.Label(timer,text="",bg=INK,fg=WHITE,font=("Segoe UI",11));route.pack(anchor="w")
+        reminder=tk.Label(panel,text="Timer uses your computer's local time. Keep this window open for a live countdown.",bg=WHITE,fg=MUTED,font=("Segoe UI",9));reminder.pack(anchor="w",pady=(14,0))
+        def tick():
+            if not win_exists(timer):return
+            b=rows[options.index(choice.get())]
+            try: target=datetime.strptime(b["journey_date"]+" "+b["depart"],"%Y-%m-%d %H:%M")
+            except ValueError: target=datetime.now()
+            delta=target-datetime.now()
+            if delta.total_seconds()<=0:
+                digits.config(text="DEPARTURE TIME",fg=GOLD)
+            else:
+                days=delta.days; sec=delta.seconds
+                digits.config(text=f"{days:02d} DAYS   {sec//3600:02d}:{(sec%3600)//60:02d}:{sec%60:02d}",fg="#7CE7DE")
+            route.config(text=f"{b['train_no']} · {b['train_name']}   |   {b['origin']} → {b['destination']}   |   {b['depart']}")
+            self.root.after(1000,tick)
+        def win_exists(w):
+            try:return bool(w.winfo_exists())
+            except tk.TclError:return False
+        tick()
+        self.button(panel,"View selected ticket",lambda:self.ticket_detail(rows[options.index(choice.get())]["pnr"]),bg=BLUE).pack(anchor="w",pady=(15,0))
+    def page_explorer(self):
+        self.hero(self.page_area,"Train Explorer","Browse the sample timetable, compare routes and estimated base fares.",PURPLE)
+        area=tk.Frame(self.page_area,bg=BG);area.pack(fill="both",expand=True,padx=24,pady=(0,20))
+        search=tk.StringVar()
+        top=tk.Frame(area,bg=WHITE,padx=12,pady=12);top.pack(fill="x",pady=(0,10))
+        self.entry(top,search,45).pack(side="left",fill="x",expand=True,padx=(0,10))
+        tk.Label(top,text="Search train, number, origin or destination",bg=WHITE,fg=MUTED,font=("Segoe UI",9)).pack(side="left",padx=8)
+        tree=ttk.Treeview(area,columns=("no","name","from","to","dep","arr","fare","type"),show="headings")
+        for c,t,w in [("no","Train no.",80),("name","Train name",180),("from","From",175),("to","To",175),("dep","Departs",75),("arr","Arrives",75),("fare","Base fare",90),("type","Service",110)]:
+            tree.heading(c,text=t);tree.column(c,width=w,anchor="w")
+        tree.pack(fill="both",expand=True)
+        def render(*_):
+            tree.delete(*tree.get_children())
+            q=search.get().lower()
+            for t in TRAIN_DATA:
+                if not q or any(q in str(x).lower() for x in (t[0],t[1],t[2],t[3],t[8])):
+                    tree.insert("","end",values=(t[0],t[1],t[2],t[3],t[4],t[5],f"₹{t[6]}",t[8]))
+        search.trace_add("write",render);render()
+    def page_help(self):
+        self.hero(self.page_area,"The RailNova handbook","A polished academic demo built with Tkinter, SQLite and animated Canvas artwork.",BLUE)
+        panel=tk.Frame(self.page_area,bg=WHITE,highlightbackground="#2B3852",highlightthickness=1,padx=24,pady=22);panel.pack(fill="both",expand=True,padx=24,pady=(0,22))
+        sections=[
+            ("01  BOOKING WORKFLOW","Select From / To, date, travel class and passenger count. Search services, enter passenger names and confirm a demo booking. A unique PNR and seat details are saved."),
+            ("02  TICKET MANAGEMENT","My Tickets shows all records. View details to inspect PNR, route, date, passenger names, coach, seat numbers, class, fare and status. Cancelled records remain in Cancelled Tickets."),
+            ("03  JOURNEY COUNTDOWN","The Journey Timer counts down to the selected ticket's departure using the computer's local time. It updates every second while the page is open."),
+            ("04  DATA STORAGE","SQLite database railnova.db is created automatically in this project folder. Bookings persist when you close and reopen the app."),
+            ("05  TECHNOLOGY","Python + Tkinter/ttk for GUI, Canvas for animated visual elements, SQLite for persistence, datetime for journey countdown. No external pip packages are required."),
+            ("06  IMPORTANT LIMITATION","This is a college demonstration, not connected to IRCTC or live railway APIs. Trains, fares, timings, availability, PNRs and seats are sample/demo values. It does not issue real tickets or process payments.")
+        ]
+        for title,body in sections:
+            tk.Label(panel,text=title,bg=WHITE,fg=BLUE,font=("Segoe UI",10,"bold")).pack(anchor="w",pady=(10,4))
+            tk.Label(panel,text=body,bg=WHITE,fg="#EDF3FF",font=("Segoe UI",10),wraplength=1020,justify="left").pack(anchor="w",pady=(0,7))
+        self.button(panel,"Start booking  →",lambda:self.show_page("Book Tickets"),bg=BLUE).pack(anchor="w",pady=(14,0))
+    def animate_background(self):
+        # A live, gently animated station-window motif in the sidebar brand mark.
+        self.animation_tick += 1
+        try:
+            cv=self.sidebar.winfo_children()[0].winfo_children()[0]
+            cv.delete("motion")
+            t=self.animation_tick
+            x=8+(t%24)
+            cv.create_line(x,8,x+5,8,fill="#9FE9F0",width=2,tags="motion")
+            cv.create_oval(28,7+(math.sin(t/5)*2),33,12+(math.sin(t/5)*2),outline="#7CE7DE",width=2,tags="motion")
+            pulse = "#D946FF" if (t//8)%2 else "#22DFFF"
+            for n,b in self.nav_buttons.items():
+                if n == self.page:
+                    b.config(highlightbackground=pulse, highlightthickness=2, fg="#FFFFFF")
+                else:
+                    b.config(highlightthickness=0)
+            for w in self.quicknav.winfo_children():
+                if w.winfo_exists():
+                    w.config(highlightbackground=pulse if (t//10)%2 else "#164C9B")
+        except (tk.TclError,IndexError,AttributeError): pass
+        self.root.after(100,self.animate_background)
+    def update_clock(self):
+        try:self.clock_label.config(text="●  LOCAL TIME  "+datetime.now().strftime("%a, %d %b %Y   %I:%M:%S %p"))
+        except tk.TclError:pass
+        self.root.after(1000,self.update_clock)
+    def refresh_counts(self): pass
+    def on_close(self):
+        try:self.db.close()
+        except Exception:pass
+        self.root.destroy()
 
 def main():
-    project_dir = Path(__file__).resolve().parent
-    source = zlib.decompress(base64.b64decode(_PAYLOAD))
-    source_path = project_dir / "railnova_source.py"
-    if not source_path.exists() or source_path.read_bytes() != source:
-        source_path.write_bytes(source)
-    namespace = {"__name__": "__main__", "__file__": str(source_path)}
-    exec(compile(source, str(source_path), "exec"), namespace)
+    root=tk.Tk()
+    app=RailNova(root)
+    root.mainloop()
 
-if __name__ == "__main__":
+if __name__=="__main__":
     main()

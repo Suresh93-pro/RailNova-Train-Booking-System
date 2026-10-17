@@ -1,19 +1,17 @@
-# Python
+# Python artifacts
 __pycache__/
 *.py[cod]
-*.pyo
 .venv/
 venv/
 .env
 
-# Local application data
+# Local app database and sample user data
 railnova.db
 *.db
+*.sqlite
+*.sqlite3
 
-# The launcher expands this readable source file on first run
-railnova_source.py
-
-# Editor / OS files
+# Generated or local files
 .vscode/
 .idea/
 .DS_Store
