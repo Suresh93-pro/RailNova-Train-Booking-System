@@ -5,12 +5,12 @@
 
 **Plan your route. Organize your tickets. Track your next departure.**
 
-A neon-inspired desktop train-booking demo built with **Python, Tkinter, and SQLite**.
+A neon-inspired desktop train-booking demo built with **Python, Tkinter and SQLite**.
 
 ![Python](https://img.shields.io/badge/Python-3.x-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![GUI](https://img.shields.io/badge/GUI-Tkinter-00D9FF?style=for-the-badge)
 ![Database](https://img.shields.io/badge/Database-SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
-![Project](https://img.shields.io/badge/Project-Academic_Demo-8A2BE2?style=for-the-badge)
+![Academic Project](https://img.shields.io/badge/Project-Academic_Demo-8A2BE2?style=for-the-badge)
 
 </div>
 
@@ -18,37 +18,37 @@ A neon-inspired desktop train-booking demo built with **Python, Tkinter, and SQL
 
 ## ✨ About RailNova
 
-RailNova is a desktop GUI project designed to bring train search, demo ticket booking, ticket management, sample station departures, and journey countdowns into one interface. It uses a dark, neon-inspired visual theme with cyan and magenta accents.
+RailNova is a desktop GUI project that brings train search, demo ticket booking, ticket management, sample station departures and journey countdowns into one application. The interface uses a dark, neon-inspired visual theme with cyan and magenta accents.
 
-This project demonstrates practical **Tkinter GUI design, event handling, modular navigation, local persistence, and date/time logic**.
+The project demonstrates **Tkinter GUI design, event handling, modular navigation, local database persistence and date/time logic**.
 
 ## 🌌 Features
 
-| Module | What it does |
+| Module | Capabilities |
 |---|---|
-| **Overview Dashboard** | Booking overview, upcoming journeys, cancellation summary, spend summary, and quick route search |
-| **Book Tickets** | Enter origin, destination, journey date, class, and passenger count; browse sample services and enter passenger names |
-| **My Tickets** | View saved demo bookings, PNR, route, passenger details, coach/seat labels, class, and estimated fare |
-| **Incoming Trains** | Browse sample services by station with scheduled departure and arrival times |
-| **Upcoming Journeys** | Review non-cancelled journeys scheduled for today or a future date |
-| **Cancelled Tickets** | Keep cancelled demo tickets in a separate history |
-| **Journey Timer** | Live per-second countdown to a selected saved journey departure |
-| **Train Explorer** | Filter sample timetable data by train number, name, route, or service type |
-| **Help & About** | Project information, technologies, workflow, and limitations |
+| **Overview Dashboard** | Booking totals, upcoming journeys, cancellations, travel-spend summary and quick route search |
+| **Book Tickets** | From/To stations, journey date, travel class, passenger count, sample train results and passenger-name entry |
+| **My Tickets** | Saved demo bookings, PNR, train and route details, passenger names, coach/seat labels, class, fare and status |
+| **Incoming Trains** | Sample departures by selected station with scheduled departure and arrival times |
+| **Upcoming Journeys** | Upcoming non-cancelled journeys |
+| **Cancelled Tickets** | Separate history of cancelled demo bookings |
+| **Journey Timer** | Live per-second countdown to the selected journey's departure |
+| **Train Explorer** | Instant filtering by train number, train name, origin, destination or service type |
+| **Help & About** | Workflow, technology stack, data storage and demo limitations |
 
 ## 🧰 Technology Stack
 
 - **Python 3** — application logic
-- **Tkinter and ttk** — desktop interface, widgets, dialogs, and tables
-- **Tkinter Canvas** — drawn visual elements and UI animation
-- **SQLite** — persistent local booking storage
-- **datetime** — journey-date validation and departure countdown
+- **Tkinter / ttk** — desktop widgets, forms, navigation, dialogs and tables
+- **Tkinter Canvas** — vector-drawn visuals and animated accents
+- **SQLite** — local booking persistence
+- **datetime** — date validation and departure countdown
 
-No additional `pip` packages are required on a standard Windows Python installation that includes Tkinter.
+No external `pip` packages are required. Use a standard Python installation that includes Tkinter.
 
 ## 🚀 Run Locally
 
-1. Download or clone this repository.
+1. Clone or download this repository.
 2. Open the project folder in VS Code or a terminal.
 3. Run:
 
@@ -56,33 +56,25 @@ No additional `pip` packages are required on a standard Windows Python installat
    py main.py
    ```
 
-   On systems where `py` is unavailable, try:
+   If the `py` command is not available, use:
 
    ```bash
    python main.py
    ```
 
-The application creates its local SQLite database automatically when launched.
+The launcher expands the bundled, readable application source to `railnova_source.py` on first run and then starts the app. The SQLite database `railnova.db` is created automatically in the project folder.
 
 ## 🗂️ Project Structure
 
 ```text
 RailNova-Train-Booking-System/
-├── main.py
+├── main.py                         # Launcher for the application
+├── railnova_source.py              # Expanded source, created on first launch
 ├── README.md
 ├── .gitignore
-├── screenshots/
-│   ├── overview.png
-│   ├── booking.png
-│   ├── incoming-trains.png
-│   └── help-about.png
 └── presentation/
     └── RailNova_Personalized_10_Slides.pptx
 ```
-
-## 🖼️ Application Screenshots
-
-Screenshots from the project output are included in the `screenshots/` directory. They show the overview dashboard, booking/train results, incoming train list, and Help & About page.
 
 ## 🎓 Academic Project
 
@@ -91,24 +83,24 @@ Screenshots from the project output are included in the `screenshots/` directory
 **Program:** B.Tech — CSE (Cybersecurity)  
 **Course context:** Advanced Programming Practice — Tkinter project
 
-The accompanying PowerPoint contains 10 slides covering the overview, GUI modules, booking workflow, ticket management, countdown feature, technology stack, and conclusion.
+The 10-slide presentation covers the project overview, GUI modules, booking workflow, ticket management, journey timer, technology stack and conclusion. It uses the same neon visual direction and includes project-output screenshot designs.
 
 ## ⚠️ Important Demo Limitations
 
 RailNova is an **educational prototype**, not a live railway reservation service.
 
 - It is **not connected to IRCTC** or any live railway API.
-- Train schedules, fares, availability, PNRs, coach names, and seat labels are demonstration data.
+- Train names, schedules, availability, fares, PNRs, coach names and seat labels are demonstration data.
 - No real ticket is issued and no payment is processed.
-- The countdown uses the local computer clock and the saved demo journey date/time.
+- The journey timer uses the computer's local clock and the selected demo journey date/time.
 
 ## 🔭 Future Scope
 
-- Integration with an authorized live train information API
-- Real user authentication and booking profiles
-- Live availability and verified schedules
-- Secure payment gateway integration for a production implementation
-- Notifications and printable ticket exports
+- Connect to an authorized live railway information API
+- Add user profiles and authentication
+- Use verified schedules and availability
+- Add secure payment integration for a production system
+- Add notifications and printable ticket exports
 
 ---
 
