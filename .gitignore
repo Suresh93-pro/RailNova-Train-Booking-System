@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+.env
+
+# Local application data
+railnova.db
+*.db
+
+# The launcher expands this readable source file on first run
+railnova_source.py
+
+# Editor / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
